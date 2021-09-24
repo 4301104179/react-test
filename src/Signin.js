@@ -6,7 +6,8 @@ import {
     Form,
     FormGroup
 } from 'reactstrap';
-
+import { connect } from 'react-redux'
+import { toggleSignin } from './redux/action';
 
 
 
@@ -21,12 +22,22 @@ class Signin extends React.Component {
 
     handleSubmit = event => {
         event.preventDefault();
+        const { userList, toggleSignin } = this.props
+        const { email, password } = this.state
+        const foundemail = userList.find(user =>
+            user.email === email && user.password === password
+        )
+        if (!foundemail || foundemail.password !== password) {
+            alert('sai toàn khoản hoặc mật khẩu vui lòng đăng nhập lại')
+            return
+        }
         this.setState({ email: '', password: '' })
+        toggleSignin()
         alert('Đăng nhập thành công')
-        this.props.toggleSignin()
     }
 
     handleChange = event => {
+        const { email, password } = this.state
         const { value, name } = event.target
         this.setState({ [name]: value })
     }
@@ -54,7 +65,6 @@ class Signin extends React.Component {
                         name="password"
                         id="Password"
                         value={this.state.password}
-                        pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
                         onChange={e => this.handleChange(e)}
                         placeholder="Password"
                     />
@@ -69,5 +79,12 @@ class Signin extends React.Component {
     }
 }
 
+const mapStateToProps = ({ user }) => ({
+    userList: user.user_list
+})
 
-export default Signin
+const mapDispatchToProps = dispatch => ({
+    toggleSignin: () => dispatch(toggleSignin())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Signin)

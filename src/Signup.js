@@ -6,6 +6,8 @@ import {
     Form,
     FormGroup
 } from 'reactstrap';
+import { connect } from 'react-redux'
+import { signUp, toggleSignup } from './redux/action';
 
 class Signup extends React.Component {
     constructor(props) {
@@ -20,14 +22,23 @@ class Signup extends React.Component {
 
     handleSubmit = event => {
         const { email, password, confirmPassword } = this.state
+        const { userList, toggleSignup, signUp } = this.props
         event.preventDefault();
+        const foundemail = userList.find(user =>
+            user.email === email && user.password === password
+        )
+        if (foundemail && email === foundemail.email) {
+            alert('email đã tồn tại')
+            return
+        }
         if (confirmPassword !== password) {
             alert("Mật khẩu không trùng khớp")
             return
         }
-        this.setState({ name: '', email: '', password: '', confirmPassword: '' })
+        signUp({ email, password })
         alert('Đăng ký thành công')
-        this.props.toggleSignup()
+        this.setState({ name: '', email: '', password: '', confirmPassword: '' })
+        toggleSignup()
     }
 
     handleChange = event => {
@@ -102,6 +113,13 @@ class Signup extends React.Component {
 
 }
 
+const mapStateToProps = ({ user }) => ({
+    userList: user.user_list
+})
 
+const mapDispatchToProps = dispatch => ({
+    toggleSignup: () => dispatch(toggleSignup()),
+    signUp: emailandpassword => dispatch(signUp(emailandpassword))
+})
 
-export default Signup
+export default connect(mapStateToProps, mapDispatchToProps)(Signup)
